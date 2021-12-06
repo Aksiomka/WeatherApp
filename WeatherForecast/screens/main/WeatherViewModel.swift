@@ -7,6 +7,14 @@
 
 import Foundation
 
+protocol WeatherViewModelProtocol: ObservableObject {
+    var lastUpdated: String { get }
+    var models: [WeatherModel] { get }
+    var errorMessage: String? { get }
+    
+    func updateData()
+}
+
 class WeatherViewModel: NSObject, ObservableObject {
     let cityCoordinatesList = [
         CityCoordinates(city: "Kudrovo", lat: 59.899720, lon: 30.516929),
@@ -24,7 +32,9 @@ class WeatherViewModel: NSObject, ObservableObject {
     init(weatherService: WeatherServiceProtocol) {
         self.weatherService = weatherService
     }
-    
+}
+ 
+extension WeatherViewModel: WeatherViewModelProtocol {
     func updateData() {
         Task.detached(priority: .background) {
             do {
@@ -53,8 +63,10 @@ class WeatherViewModel: NSObject, ObservableObject {
             }
         }
     }
+}
 
-    private func convertForecast(_ forecast: WeatherAPIModel, city: String) -> WeatherModel {
+private extension WeatherViewModel {
+    func convertForecast(_ forecast: WeatherAPIModel, city: String) -> WeatherModel {
         return WeatherModel(
             city: city,
             currentTemperature: formatTemperature(forecast.current.temp),
@@ -64,7 +76,7 @@ class WeatherViewModel: NSObject, ObservableObject {
         )
     }
     
-    private func convertDailyForecast(_ forecast: Daily) -> ForecastForDayModel {
+    func convertDailyForecast(_ forecast: Daily) -> ForecastForDayModel {
         return ForecastForDayModel(
             date: convertDate(forecast.dt),
             temperatureDay: formatTemperature(forecast.temp.day),
@@ -74,25 +86,25 @@ class WeatherViewModel: NSObject, ObservableObject {
         )
     }
     
-    private func convertDate(_ dt: Int64) -> String {
+    func convertDate(_ dt: Int64) -> String {
         let date = Date(timeIntervalSince1970: TimeInterval(dt))
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd MMM"
         return dateFormatter.string(from: date)
     }
     
-    private func formatTemperature(_ temperature: Float) -> String {
+    func formatTemperature(_ temperature: Float) -> String {
         let prefix = temperature > 0 ? "+" : ""
         return "\(prefix)\(Int(temperature.rounded()))°"
     }
     
-    private func formatDateTime(_ date: Date) -> String {
+    func formatDateTime(_ date: Date) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd MMM yyyy HH:mm"
         return dateFormatter.string(from: date)
     }
     
-    private func constructIconUrl(icon: String) -> URL? {
+    func constructIconUrl(icon: String) -> URL? {
         return URL(string: WeatherService.constructImageUrl(icon: icon))
     }
 }

@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct WeatherView: View {
-    @ObservedObject var viewModel: WeatherViewModel
+struct WeatherView<ViewModel>: View where ViewModel: WeatherViewModelProtocol {
+    @ObservedObject var viewModel: ViewModel
     
     var body: some View {
         NavigationView {
@@ -40,6 +40,16 @@ struct WeatherView: View {
             }
             .navigationTitle("Weather Forecast")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: {
+                        LocationsView(viewModel: LocationsViewModel(userDefaultsStorage: UserDefaultsStorage()))
+                    }, label: {
+                        Image(systemName: "gearshape.fill")
+                            .foregroundColor(Color(white: 0))
+                    })
+                }
+            }
         }
         .onAppear {
             viewModel.updateData()

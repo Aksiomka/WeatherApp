@@ -8,7 +8,7 @@
 import Foundation
 
 class WeatherFactory {
-    func make() -> WeatherView {
+    func make() -> WeatherView<WeatherViewModel> {
         return WeatherView(viewModel: WeatherViewModel(weatherService: WeatherService()))
     }
 }
