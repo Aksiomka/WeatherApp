@@ -9,6 +9,6 @@ import Foundation
 
 class AddLocationFactory {
     func make() -> AddLocationView<AddLocationViewModel> {
-        return AddLocationView(viewModel: AddLocationViewModel(userDefaultsStorage: UserDefaultsStorage()))
+        return AddLocationView(viewModel: AddLocationViewModel(locationsStorage: LocationsStorage()))
     }
 }

@@ -9,6 +9,6 @@ import Foundation
 
 class WeatherFactory {
     func make() -> WeatherView<WeatherViewModel> {
-        return WeatherView(viewModel: WeatherViewModel(weatherService: WeatherService()))
+        return WeatherView(viewModel: WeatherViewModel(weatherService: WeatherService(), locationsStorage: LocationsStorage()))
     }
 }

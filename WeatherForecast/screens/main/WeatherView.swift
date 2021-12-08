@@ -10,6 +10,8 @@ import SwiftUI
 struct WeatherView<ViewModel>: View where ViewModel: WeatherViewModelProtocol {
     @ObservedObject var viewModel: ViewModel
     
+    let locationsView = LocationsFactory().make()
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -21,15 +23,21 @@ struct WeatherView<ViewModel>: View where ViewModel: WeatherViewModelProtocol {
                     }
                     .font(.system(size: 12))
                     .foregroundColor(Color(white: 0.5))
-                    List {
-                        ForEach(viewModel.models, id: \.self) { model in
-                            CityWeatherCell(model: model)
-                                .listRowSeparator(.hidden)
+                    if !viewModel.isEmptyLocations {
+                        List {
+                            ForEach(viewModel.models, id: \.self) { model in
+                                CityWeatherCell(model: model)
+                                    .listRowSeparator(.hidden)
+                            }
                         }
-                    }
-                    .listStyle(PlainListStyle())
-                    .refreshable {
-                        viewModel.updateData()
+                        .listStyle(PlainListStyle())
+                        .refreshable {
+                            viewModel.updateData()
+                        }
+                    } else {
+                        Spacer()
+                        Text("There are no locations")
+                        Spacer()
                     }
                     if viewModel.errorMessage != nil {
                         Text(viewModel.errorMessage ?? "")
@@ -43,7 +51,7 @@ struct WeatherView<ViewModel>: View where ViewModel: WeatherViewModelProtocol {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: {
-                        LocationsView(viewModel: LocationsViewModel(userDefaultsStorage: UserDefaultsStorage()))
+                        locationsView
                     }, label: {
                         Image(systemName: "gearshape.fill")
                             .foregroundColor(Color(white: 0))
@@ -59,6 +67,6 @@ struct WeatherView<ViewModel>: View where ViewModel: WeatherViewModelProtocol {
 
 struct WeatherView_Previews: PreviewProvider {
     static var previews: some View {
-        WeatherView(viewModel: WeatherViewModel(weatherService: WeatherService()))
+        WeatherView(viewModel: WeatherViewModel(weatherService: WeatherService(), locationsStorage: LocationsStorage()))
     }
 }

@@ -15,11 +15,11 @@ struct AddLocationView<ViewModel>: View where ViewModel: AddLocationViewModelPro
     var body: some View {
         ZStack {
             Color.white
-            VStack {
+            VStack(spacing: 0) {
                 ZStack {
                     MapView(centerCoordinate: $viewModel.centerCoordinate)
                     Circle()
-                        .fill(Color.red)
+                        .fill(Color.blue)
                         .opacity(0.3)
                         .frame(width: 16, height: 16)
                 }
@@ -32,7 +32,15 @@ struct AddLocationView<ViewModel>: View where ViewModel: AddLocationViewModelPro
                         Image(systemName: "plus")
                         Text("Add location")
                     }
+                    .padding(8)
+                    .foregroundColor(.blue)
+                    .background(.white)
+                    .cornerRadius(12)
+                    .padding(1)
+                    .background(.blue)
+                    .cornerRadius(13)
                 }
+                Spacer()
             }
         }
         .navigationTitle("Add location")
@@ -42,6 +50,6 @@ struct AddLocationView<ViewModel>: View where ViewModel: AddLocationViewModelPro
 
 struct AddLocationView_Previews: PreviewProvider {
     static var previews: some View {
-        AddLocationView(viewModel: AddLocationViewModel(userDefaultsStorage: UserDefaultsStorage()))
+        AddLocationView(viewModel: AddLocationViewModel(locationsStorage: LocationsStorage()))
     }
 }

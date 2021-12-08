@@ -16,10 +16,10 @@ protocol AddLocationViewModelProtocol: ObservableObject {
 class AddLocationViewModel: NSObject, ObservableObject {
     @Published var centerCoordinate: CLLocationCoordinate2D = CLLocationCoordinate2D()
     
-    private let userDefaultsStorage: UserDefaultsStorageProtocol
+    private let locationsStorage: LocationsStorageProtocol
     
-    init(userDefaultsStorage: UserDefaultsStorageProtocol) {
-        self.userDefaultsStorage = userDefaultsStorage
+    init(locationsStorage: LocationsStorageProtocol) {
+        self.locationsStorage = locationsStorage
     }
     
 }
@@ -28,7 +28,7 @@ extension AddLocationViewModel: AddLocationViewModelProtocol {
     func addLocation() {
         Task.detached(priority: .background) {
             let location = await self.createLocationModel(coordinate: self.centerCoordinate)
-            self.userDefaultsStorage.addLocation(location)
+            await self.locationsStorage.addLocation(location)
         }
     }
 }

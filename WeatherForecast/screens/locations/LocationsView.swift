@@ -13,14 +13,19 @@ struct LocationsView<ViewModel>: View where ViewModel: LocationsViewModelProtoco
     var body: some View {
         ZStack {
             Color.white
-            VStack {
+            if !viewModel.locations.isEmpty {
                 List {
                     ForEach(viewModel.locations, id: \.self) { location in
                         LocationCell(model: location)
                             .listRowSeparator(.hidden)
                     }
+                    .onDelete(perform: { indexSet in
+                        viewModel.deleteLocations(at: indexSet)
+                    })
                 }
                 .listStyle(PlainListStyle())
+            } else {
+                Text("There are no locations")
             }
         }
         .navigationTitle("Locations")
@@ -43,6 +48,6 @@ struct LocationsView<ViewModel>: View where ViewModel: LocationsViewModelProtoco
 
 struct LocationsView_Previews: PreviewProvider {
     static var previews: some View {
-        LocationsView(viewModel: LocationsViewModel(userDefaultsStorage: UserDefaultsStorage()))
+        LocationsView(viewModel: LocationsViewModel(locationsStorage: LocationsStorage()))
     }
 }

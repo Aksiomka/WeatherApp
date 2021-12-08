@@ -12,7 +12,7 @@ struct CityWeatherCell: View {
 
     var body: some View {
         VStack {
-            Text(model.city)
+            Text(model.locationName)
                 .font(.system(size: 20.0))
                 .padding(EdgeInsets(top: 6, leading: 8, bottom: 0, trailing: 8))
             HStack {
@@ -52,7 +52,7 @@ struct CityWeatherCell: View {
 struct WeatherCell_Previews: PreviewProvider {
     static var previews: some View {
         CityWeatherCell(model: WeatherModel(
-            city: "Saint-Petersburg",
+            locationName: "Saint-Petersburg",
             currentTemperature: "25",
             currentIconUrl: URL(string: "10d"),
             currentCondition: "Cloudy",

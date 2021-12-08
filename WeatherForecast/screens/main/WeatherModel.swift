@@ -7,14 +7,8 @@
 
 import Foundation
 
-struct CityCoordinates {
-    let city: String
-    let lat: Float
-    let lon: Float
-}
-
 struct WeatherModel: Hashable {
-    let city: String
+    let locationName: String
     let currentTemperature: String
     let currentIconUrl: URL?
     let currentCondition: String

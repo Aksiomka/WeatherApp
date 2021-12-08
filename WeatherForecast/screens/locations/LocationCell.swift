@@ -11,15 +11,19 @@ struct LocationCell: View {
     var model: LocationModel
 
     var body: some View {
-        VStack(spacing: 2) {
-            Text("\(model.city), \(model.country)")
+        VStack(alignment: .leading, spacing: 2) {
+            Text(model.city)
+                .font(.system(size: 17.0))
+            Text(model.country)
                 .font(.system(size: 14.0))
-            Text("\(model.lat)")
-                .font(.system(size: 12.0))
-                .foregroundColor(Color(white: 0.4))
-            Text("\(model.lon)")
-                .font(.system(size: 12.0))
-                .foregroundColor(Color(white: 0.4))
+            Spacer().frame(height: 4)
+            HStack {
+                Text("\(model.lat)")
+                Text("\(model.lon)")
+            }
+            .font(.system(size: 10.0))
+            .foregroundColor(Color(white: 0.4))
+            Spacer().frame(height: 8)
         }
     }
 }

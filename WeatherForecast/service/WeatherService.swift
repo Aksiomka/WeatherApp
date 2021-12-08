@@ -8,7 +8,7 @@
 import Foundation
 
 protocol WeatherServiceProtocol {
-    func getForecast(lat: Float, lon: Float) async throws -> WeatherAPIModel
+    func getForecast(lat: Double, lon: Double) async throws -> WeatherAPIModel
 }
 
 enum WeatherServiceError: Error {
@@ -23,7 +23,7 @@ class WeatherService: WeatherServiceProtocol {
     
     private let urlSession = URLSession.shared
     
-    func getForecast(lat: Float, lon: Float) async throws -> WeatherAPIModel {
+    func getForecast(lat: Double, lon: Double) async throws -> WeatherAPIModel {
         guard let url = URL(string: urlString), var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             throw WeatherServiceError.invalidEndpoint
         }

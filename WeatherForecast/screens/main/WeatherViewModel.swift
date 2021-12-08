@@ -11,38 +11,49 @@ protocol WeatherViewModelProtocol: ObservableObject {
     var lastUpdated: String { get }
     var models: [WeatherModel] { get }
     var errorMessage: String? { get }
+    var isEmptyLocations: Bool { get }
     
     func updateData()
 }
 
 class WeatherViewModel: NSObject, ObservableObject {
-    let cityCoordinatesList = [
-        CityCoordinates(city: "Kudrovo", lat: 59.899720, lon: 30.516929),
-        CityCoordinates(city: "Barnaul", lat: 53.347285, lon: 83.789271),
-        CityCoordinates(city: "Berlin", lat: 52.518621, lon: 13.375142),
-        CityCoordinates(city: "Irvine", lat: 33.670582, lon: -117.780920)
-    ]
-    
     @Published var lastUpdated = "Never"
     @Published var models: [WeatherModel] = []
     @Published var errorMessage: String?
+    @Published var isEmptyLocations = false
     
     private let weatherService: WeatherServiceProtocol
+    private let locationsStorage: LocationsStorageProtocol
     
-    init(weatherService: WeatherServiceProtocol) {
+    init(weatherService: WeatherServiceProtocol, locationsStorage: LocationsStorageProtocol) {
         self.weatherService = weatherService
+        self.locationsStorage = locationsStorage
+        super.init()
+        NotificationCenter.default.addObserver(self, selector: #selector(locationsChanged), name: LocationsStorage.locationChangedNotificationName, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
- 
+
 extension WeatherViewModel: WeatherViewModelProtocol {
     func updateData() {
         Task.detached(priority: .background) {
+            let locations = await self.locationsStorage.getLocations()
+            await MainActor.run {
+                self.isEmptyLocations = locations.isEmpty
+            }
+            if locations.isEmpty {
+                return
+            }
+            
             do {
                 let forecasts = try await withThrowingTaskGroup(of: WeatherModel.self, returning: [WeatherModel].self) { group in
-                    for cityCoordinates in self.cityCoordinatesList {
+                    for location in locations {
                         group.addTask {
-                            let forecast = try await self.weatherService.getForecast(lat: cityCoordinates.lat, lon: cityCoordinates.lon)
-                            return self.convertForecast(forecast, city: cityCoordinates.city)
+                            let forecast = try await self.weatherService.getForecast(lat: location.lat, lon: location.lon)
+                            return self.convertForecast(forecast, locationName: "\(location.city), \(location.country)")
                         }
                     }
                     
@@ -66,9 +77,9 @@ extension WeatherViewModel: WeatherViewModelProtocol {
 }
 
 private extension WeatherViewModel {
-    func convertForecast(_ forecast: WeatherAPIModel, city: String) -> WeatherModel {
+    func convertForecast(_ forecast: WeatherAPIModel, locationName: String) -> WeatherModel {
         return WeatherModel(
-            city: city,
+            locationName: locationName,
             currentTemperature: formatTemperature(forecast.current.temp),
             currentIconUrl: constructIconUrl(icon: forecast.current.weather[0].icon),
             currentCondition: forecast.current.weather[0].description,
@@ -88,9 +99,7 @@ private extension WeatherViewModel {
     
     func convertDate(_ dt: Int64) -> String {
         let date = Date(timeIntervalSince1970: TimeInterval(dt))
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd MMM"
-        return dateFormatter.string(from: date)
+        return formatDate(date, dateFormat: "dd MMM")
     }
     
     func formatTemperature(_ temperature: Float) -> String {
@@ -99,12 +108,20 @@ private extension WeatherViewModel {
     }
     
     func formatDateTime(_ date: Date) -> String {
+        return formatDate(date, dateFormat: "dd MMM yyyy HH:mm")
+    }
+    
+    func formatDate(_ date: Date, dateFormat: String) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd MMM yyyy HH:mm"
+        dateFormatter.dateFormat = dateFormat
         return dateFormatter.string(from: date)
     }
     
     func constructIconUrl(icon: String) -> URL? {
         return URL(string: WeatherService.constructImageUrl(icon: icon))
+    }
+    
+    @objc func locationsChanged() {
+        updateData()
     }
 }
