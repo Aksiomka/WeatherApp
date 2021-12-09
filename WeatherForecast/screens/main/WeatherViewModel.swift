@@ -39,7 +39,7 @@ class WeatherViewModel: NSObject, ObservableObject {
 
 extension WeatherViewModel: WeatherViewModelProtocol {
     func updateData() {
-        Task.detached(priority: .background) {
+        Task {
             let locations = await self.locationsStorage.getLocations()
             await MainActor.run {
                 self.isEmptyLocations = locations.isEmpty

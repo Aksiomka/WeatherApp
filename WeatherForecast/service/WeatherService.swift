@@ -18,13 +18,15 @@ enum WeatherServiceError: Error {
 }
 
 class WeatherService: WeatherServiceProtocol {
-    private let apiKey = "6a8ec1ad1aec9e15884fee8d51172da7"
     private let urlString = "https://api.openweathermap.org/data/2.5/onecall"
-    
     private let urlSession = URLSession.shared
     
     func getForecast(lat: Double, lon: Double) async throws -> WeatherAPIModel {
-        guard let url = URL(string: urlString), var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+        guard
+            let url = URL(string: urlString),
+            let apiKey = getApiKey(),
+            var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        else {
             throw WeatherServiceError.invalidEndpoint
         }
         
@@ -57,5 +59,23 @@ class WeatherService: WeatherServiceProtocol {
     
     static func constructImageUrl(icon: String) -> String {
         return "https://openweathermap.org/img/wn/\(icon)@2x.png"
+    }
+}
+
+private extension WeatherService {
+    struct Keys: Decodable {
+        let weatherApiKey: String
+    }
+    
+    private func getApiKey() -> String? {
+        guard
+            let keysUrl = Bundle.main.url(forResource: "Keys", withExtension:"plist"),
+            let data = try? Data(contentsOf: keysUrl),
+            let keys = try? PropertyListDecoder().decode(Keys.self, from: data)
+        else {
+            return nil
+        }
+            
+        return keys.weatherApiKey
     }
 }

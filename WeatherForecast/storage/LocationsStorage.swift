@@ -7,14 +7,14 @@
 
 import Foundation
 
-protocol LocationsStorageProtocol {
+protocol LocationsStorageProtocol: Actor {
     func getLocations() async -> [LocationModel]
     func saveLocations(_ locations: [LocationModel]) async
     func addLocation(_ location: LocationModel) async
     func deleteLocation(_ location: LocationModel) async
 }
 
-class LocationsStorage: LocationsStorageProtocol {
+actor LocationsStorage: LocationsStorageProtocol {
     static let locationChangedNotificationName = Notification.Name("locationsChanged")
     
     private let locationsKey = "locations"

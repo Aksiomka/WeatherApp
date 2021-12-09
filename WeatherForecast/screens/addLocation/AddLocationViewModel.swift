@@ -26,7 +26,7 @@ class AddLocationViewModel: NSObject, ObservableObject {
 
 extension AddLocationViewModel: AddLocationViewModelProtocol {
     func addLocation() {
-        Task.detached(priority: .background) {
+        Task {
             let location = await self.createLocationModel(coordinate: self.centerCoordinate)
             await self.locationsStorage.addLocation(location)
         }
